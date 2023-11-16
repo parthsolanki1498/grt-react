@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import protobuf from 'protobufjs';
+import protobuf, { BufferReader } from 'protobufjs';
+import fetch from 'node-fetch';
+import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 
 const ProtoDataComponent = () => {
     const [data, setData] = useState(null);
@@ -8,20 +10,22 @@ const ProtoDataComponent = () => {
         const fetchData = async () => {
             try {
                 // Fetch data from the API
-                const response = await fetch('https://webapps.regionofwaterloo.ca/api/grt-routes/api/vehiclepositions', {
-                    mode: 'no-cors',
-                });
-                const buffer = await response.arrayBuffer();
+                // const response = await fetch('https://webapps.regionofwaterloo.ca/api/grt-routes/api/vehiclepositions', {
+                //     mode: 'no-cors',
+                // });
+                // console.log('Response: ',response);
+                // const buffer = await response.arrayBuffer();
+                // console.log('Buffer: ', buffer);
 
                 // Load the Protocol Buffer schema
-                const protoFile= require("../components/myProto.proto");
+                // const protoFile= require("../components/myProto.proto");
                 // const root = await protobuf.load('./components/myProto.proto');
-                protobuf.load(protoFile, (err, root) => {
-                    const someMessage = root.lookup('SomeMessage');
-                    const decodedData = someMessage.decode(new Uint8Array(buffer));
-                    setData(decodedData);   
-                    console.log('No damn error here:', decodedData); 
-                });
+                // protobuf.load(protoFile, (err, root) => {
+                //     const someMessage = root.lookup('Nested');
+                //     const decodedData = someMessage.decode(new Uint8Array(buffer));
+                //     setData(decodedData);   
+                //     console.log('No damn error here:', decodedData); 
+                // });
 
 
                 // Fetch SomeMessage
@@ -30,6 +34,93 @@ const ProtoDataComponent = () => {
                 // Decode the Protocol Buffers data
                 // const decodedData = someMessage.decode(new Uint8Array(buffer));
                 // setData(decodedData);
+
+
+                // const response = await fetch('https://webapps.regionofwaterloo.ca/api/grt-routes/api/vehiclepositions', {
+                //     mode: 'no-cors',
+                // });
+
+                // if (!response.ok) {
+                //     const error = new Error(`${response.url}: ${response.status} ${response.statusText}`);
+                //     error.response = response;
+                //     throw error;
+                //     process.exit(1);
+                // }
+
+                // console.log('Response: ', response);
+
+                // const buffer = await response.arrayBuffer();
+                // console.log('Buffer: ', buffer);
+
+                // Try decoding with base64
+                // const decodedDataJSON = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer)));
+                // console.log(decodedDataJSON);
+
+                // const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(new Uint8Array(buffer));
+                // console.log('Feed: ', feed);
+
+                // feed.entity.forEach((entity) => {
+                //     if (entity.tripUpdate) {
+                //       console.log(entity.tripUpdate);
+                //     }
+                // });
+
+                const response = await fetch("https://webapps.regionofwaterloo.ca/api/grt-routes/api/vehiclepositions", {
+                    headers: {
+                    //   "x-api-key": "AIzaSyBpxFj1OqTdOvhx0aNI4Sd2X98Ca8dUSuk",
+                    //   "Accept" : "application/x-google-protobuf"
+                      // replace with your GTFS-realtime source's auth token
+                      // e.g. x-api-key is the header value used for NY's MTA GTFS APIs
+                    },
+                  });
+
+                console.log('Response Status:', response.status);
+                console.log('Response Status Text:', response.statusText);
+                console.log('Response OK:', response.ok)
+
+                // console.log('Response: ', response);
+                // //   if (!response.ok) {
+                // //     const error = new Error(`${response.url}: ${response.status} ${response.statusText}`);
+                // //     error.response = response;
+                // //     throw error;
+                // //     process.exit(1);
+                // //   }
+                //   const buffer = await response.arrayBuffer();
+                //   console.log('Buffer: ', new Uint8Array(buffer));
+                //   const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(new Uint8Array(buffer));
+                //   feed.entity.forEach((entity) => {
+                //     if (entity.tripUpdate) {
+                //       console.log(entity.tripUpdate);
+                //     }
+                //   });
+
+                console.log(response.ok);
+
+                if (!response.ok) {
+                    throw new Error(`${response.url}: ${response.status} ${response.statusText}`);
+                }
+
+                const buffer = await response.arrayBuffer();
+
+                console.log('Buffer: ', buffer);
+                const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(new Uint8Array(buffer));
+
+                console.log('Feed: ', feed);
+
+                feed.entity.forEach((entity) => {
+                    if (entity.vehicle) {
+                        console.log(entity.vehicle);
+                    }
+                });
+
+                // FINALLY IT WORKS FINALLY IT WORKS FIANLLY IT WORKS
+
+                // CODE NEEDS WHOLE LOT OF EDITING YES BUT WE WILL GET THERE
+
+                // FOR NOW? EUREKA AND LET US GET SOME GOOD NIGHT SLEEP FFS
+
+                setData(feed); // Set the decoded feed data to state
+
             } catch(error) {
                 console.log('Error fetching or decoding data:', error);
             }
