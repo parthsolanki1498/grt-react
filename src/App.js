@@ -1,9 +1,23 @@
+import ProtoDataComponent from './components/ProtoDataComponent';
 import logo from './logo.svg';
-import './App.css';
+import { GoogleMap, withScriptjs, withGoogleMap } from 'react-google-maps';
+// import { GoogleMap, withScriptjs, withGoogleMap } from '@react-google-maps/api';
+// import './App.css';
+
+function Map() {
+  return (
+    <GoogleMap 
+      defaultZoom={10}
+      defaultCenter={{lat: 43.479050, lng: -80.523410}}
+    />
+  );
+}
+
+const WrappedMap = withScriptjs(withGoogleMap(Map));
 
 function App() {
   return (
-    <div className="App">
+    <div style= {{ width: "100vw", height: "100vh"}} className="App">
       {/* <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
@@ -18,7 +32,14 @@ function App() {
           Learn React
         </a>
       </header> */}
-      Map Here
+      <WrappedMap 
+      googleMapURL= {`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places&key=${process.env.REACT_APP_GOOGLE_KEY}`}
+      loadingElement = {<div style={{ height: "100%" }} />}
+      containerElement   = {<div style={{ height: "100%" }} />}
+      mapElement = {<div style={{ height: "100%" }} />}
+      />
+
+      <ProtoDataComponent/>
     </div>
   );
 }

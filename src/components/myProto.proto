@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+message SomeMessage {
+
+    message Trip {
+        string trip_id = 1;
+        string start_time = 2;
+        string start_date = 3;
+        string route_id = 4;
+    }
+
+    message Position {
+        string latitude = 1;
+        string longitude = 2;
+    }
+
+    message Vehicle1 {
+        string id = 1;
+    }
+
+    message Vehicle {
+        Trip trip = 1;
+        Position position = 2;
+        string current_stop_sequence = 3;
+        string current_status = 4;
+        Vehicle1 vehicle = 5;
+    }
+
+    message Nested {
+        string id = 1;
+        bool is_deleted = 2;
+        Vehicle vehicle = 3;
+    }
+
+    repeated Nested items = 1;
+}
