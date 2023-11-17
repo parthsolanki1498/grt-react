@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import protobuf, { BufferReader } from 'protobufjs';
 import fetch from 'node-fetch';
 import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
+import { Marker } from 'react-google-maps';
 
-const ProtoDataComponent = () => {
+const ProtoDataComponent = ( {onVehiclePositionsUpdate}) => {
     const [data, setData] = useState(null);
+
+    const [vehiclePositions, setVehiclePositions] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -107,11 +110,26 @@ const ProtoDataComponent = () => {
 
                 console.log('Feed: ', feed);
 
+                const positions  = feed.entity
+                .filter(entity => entity.vehicle)
+                .map(entity => entity.vehicle.position);
+
+                console.log('Imp console', feed.entity.filter(entity => entity.vehicle).map(entity => entity.vehicle.position));
+      
                 feed.entity.forEach((entity) => {
                     if (entity.vehicle) {
-                        console.log(entity.vehicle);
+                        // console.log(entity.vehicle);
+                        // console.log('Positions: ', entity.vehicle.position);
                     }
                 });
+
+                setVehiclePositions(positions);
+
+
+                onVehiclePositionsUpdate(positions);
+
+
+                // console.log('Proto Data Comp', vehiclePositions);
 
                 // FINALLY IT WORKS FINALLY IT WORKS FIANLLY IT WORKS
 
@@ -127,16 +145,14 @@ const ProtoDataComponent = () => {
         };
 
         fetchData();
-    }, []);
+    },[]);
+    // }, [onVehiclePositionsUpdate, vehiclePositions]);
 
-    return (
-        <div>
-            <h1>Protocol Buffer Data</h1>
-            { data && (
-                <pre>{JSON.stringify(data, null, 2)}</pre>
-            )}
-        </div>
-    );
+    console.log('Rendered vehiclePositions:', vehiclePositions);
+
+    // return vehiclePositions;
+    return null;
+    
 };
 
 export default ProtoDataComponent;

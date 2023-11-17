@@ -1,21 +1,40 @@
+import { useState } from 'react';
 import ProtoDataComponent from './components/ProtoDataComponent';
 import logo from './logo.svg';
-import { GoogleMap, withScriptjs, withGoogleMap } from 'react-google-maps';
+import { GoogleMap, withScriptjs, withGoogleMap, Marker } from 'react-google-maps';
 // import { GoogleMap, withScriptjs, withGoogleMap } from '@react-google-maps/api';
 // import './App.css';
 
-function Map() {
+const Map = ( {vehiclePositions}) => {
+
   return (
     <GoogleMap 
-      defaultZoom={10}
-      defaultCenter={{lat: 43.479050, lng: -80.523410}}
-    />
+      defaultZoom={15}
+      defaultCenter={{lat: 43.479050, lng: -80.523410}}>
+
+
+    {/* Map over the vehicle positions and create a Marker for each position */}
+    {vehiclePositions.map((position, index) => (
+        <Marker key={index} position={{ lat: position.latitude, lng: position.longitude }} />
+    ))}
+
+
+    </GoogleMap>
   );
 }
 
 const WrappedMap = withScriptjs(withGoogleMap(Map));
 
 function App() {
+
+  const [receivedVehiclePositions, setReceivedVehiclePositions] = useState([]);
+
+  // Callback function to receive vehiclePositions from the child
+  const handleVehiclePositionsUpdate = (positions) => {
+    setReceivedVehiclePositions(positions);
+  };
+
+
   return (
     <div style= {{ width: "100vw", height: "100vh"}} className="App">
       {/* <header className="App-header">
@@ -37,9 +56,9 @@ function App() {
       loadingElement = {<div style={{ height: "100%" }} />}
       containerElement   = {<div style={{ height: "100%" }} />}
       mapElement = {<div style={{ height: "100%" }} />}
+      vehiclePositions={receivedVehiclePositions}
       />
-
-      <ProtoDataComponent/>
+      <ProtoDataComponent onVehiclePositionsUpdate={handleVehiclePositionsUpdate}/>
     </div>
   );
 }
